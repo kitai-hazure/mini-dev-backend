@@ -1,9 +1,23 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as admin from 'firebase-admin';
+import { ServiceAccount } from 'firebase-admin';
+import serviceData from '../serviceAccount.json';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  console.log('Serving on Port 3000 🔥');
-  await app.listen(3000);
+
+  const adminConfig: ServiceAccount = {
+    projectId: serviceData.project_id,
+    privateKey: serviceData.private_key.replace(/\\n/g, '\n'),
+    clientEmail: serviceData.client_email,
+  };
+
+  admin.initializeApp({
+    credential: admin.credential.cert(adminConfig),
+  });
+
+  app.enableCors();
+  await app.listen(3000, () => console.log('Server is running on port 3000🔥'));
 }
 bootstrap();

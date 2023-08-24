@@ -37,3 +37,4 @@ lerna-debug.log*
 .env
 /src/data_ingestor/data.json
 /src/data_ingestor/linkspage.json
+serviceAccount.json
