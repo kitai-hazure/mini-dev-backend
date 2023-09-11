@@ -8,7 +8,7 @@ import { JwtModule } from '@nestjs/jwt';
   providers: [UserService],
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: 'thisisadarksecret',
     }),
   ],
 })

@@ -6,25 +6,21 @@ import {
 } from './helper/data_embedder.helper';
 import { ChromaClient } from 'chromadb';
 import * as fs from 'fs';
-// import Replicate from 'replicate';
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
-// import { ChatOpenAI } from 'langchain/chat_models/openai';
-import { LLMChain, ConversationChain } from 'langchain/chains';
-// import { BufferMemory } from 'langchain/memory';
+import { LLMChain } from 'langchain/chains';
 
 @Injectable()
 export class DataIngestorService {
   chromaClient: ChromaClient;
   chain: any;
-  // convChain: any;
 
   constructor() {
     this.chromaClient = new ChromaClient();
     const llm = new OpenAI({
-      openAIApiKey: process.env.OPENAI_API_KEY,
+      openAIApiKey: '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',
       temperature: 0.9,
-      modelName: process.env.OPENAI_MODEL_NAME,
+      modelName: 'text-davinci-003',
       maxTokens: 256,
       topP: 0.2,
     });
@@ -37,20 +33,6 @@ export class DataIngestorService {
       llm: llm,
       prompt: prompt,
     });
-
-    // const chat = new ChatOpenAI({
-    //   openAIApiKey: process.env.OPENAI_API_KEY,
-    //   temperature: 0.9,
-    //   modelName: process.env.OPENAI_MODEL_NAME,
-    //   maxTokens: 256,
-    //   topP: 0.2,
-    // });
-
-    // const memory = new BufferMemory();
-    // this.convChain = new ConversationChain({
-    //   llm: chat,
-    //   memory: memory,
-    // });
   }
 
   async injectFile(@UploadedFiles() files: Array<Express.Multer.File>) {

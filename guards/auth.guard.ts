@@ -15,7 +15,6 @@ export class AuthGuard implements CanActivate {
 
       const user = await getUserFromToken(payload.uid);
       if (!user) return false;
-      console.log('USER FROM TOKEN: ', user);
       req.user = user;
       if (payload) {
         return true;
