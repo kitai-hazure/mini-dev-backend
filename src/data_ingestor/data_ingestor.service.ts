@@ -9,7 +9,7 @@ import * as fs from 'fs';
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { LLMChain } from 'langchain/chains';
-
+import { ENV } from 'src/constants/env';
 @Injectable()
 export class DataIngestorService {
   chromaClient: ChromaClient;
@@ -18,9 +18,9 @@ export class DataIngestorService {
   constructor() {
     this.chromaClient = new ChromaClient();
     const llm = new OpenAI({
-      openAIApiKey: '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',
+      openAIApiKey: ENV.OPENAI_API_KEY,
       temperature: 0.9,
-      modelName: 'text-davinci-003',
+      modelName: ENV.OPENAI_MODEL_NAME,
       maxTokens: 256,
       topP: 0.2,
     });
