@@ -10,8 +10,8 @@ import {
 import { DataIngestorService } from './data_ingestor.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UserService } from 'src/user/user.service';
-import { AuthGuard } from 'guards/auth.guard';
-import { IChatType } from 'types/chat.type';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { IChatType } from 'src/types/chat.type';
 
 @Controller('data-ingestor')
 export class DataIngestorController {

@@ -7,8 +7,8 @@ import {
   Get,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { AuthGuard } from 'guards/auth.guard';
-import { IChatType } from 'types/chat.type';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { IChatType } from 'src/types/chat.type';
 
 @Controller('user')
 export class UserController {

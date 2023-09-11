@@ -38,3 +38,5 @@ lerna-debug.log*
 /src/data_ingestor/data.json
 /src/data_ingestor/linkspage.json
 serviceAccount.json
+Spacefile
+.space

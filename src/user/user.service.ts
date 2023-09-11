@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as admin from 'firebase-admin';
-import { IChatType } from 'types/chat.type';
+import { IChatType } from 'src/types/chat.type';
 
 @Injectable()
 export class UserService {
