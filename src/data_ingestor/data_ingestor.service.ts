@@ -4,19 +4,20 @@ import {
   createEmbeddings,
   createQueryEmbedding,
 } from './helper/data_embedder.helper';
-import { ChromaClient } from 'chromadb';
 import * as fs from 'fs';
 import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { LLMChain } from 'langchain/chains';
 import { ENV } from 'src/constants/env';
+import { pinecone } from 'src/constants/pinecone';
+
 @Injectable()
 export class DataIngestorService {
-  chromaClient: ChromaClient;
   chain: any;
+  pineconeClient: any;
 
   constructor() {
-    this.chromaClient = new ChromaClient();
+    this.pineconeClient = pinecone.index('minideveloper');
     const llm = new OpenAI({
       openAIApiKey: ENV.OPENAI_API_KEY,
       temperature: 0.9,
@@ -41,19 +42,25 @@ export class DataIngestorService {
 
     const embeddedDetails = await createEmbeddings(pages);
 
-    const line_texts = embeddedDetails['line_texts'];
     const line_embeddings = embeddedDetails['line_text_embeddings'];
     const line_metadata = embeddedDetails['line_metadata'];
     const line_ids = embeddedDetails['line_ids'];
-    const collection = await this.chromaClient.getOrCreateCollection({
-      name: 'test_data_2',
-    });
-    await collection.add({
-      ids: line_ids,
-      embeddings: line_embeddings,
-      metadatas: line_metadata,
-      documents: line_texts,
-    });
+
+    const records = [];
+    const BATCH_SIZE = 80;
+
+    for (let i = 0; i < line_ids.length; i++) {
+      records.push({
+        id: line_ids[i],
+        values: line_embeddings[i],
+        metadata: line_metadata[i],
+      });
+    }
+
+    for (let i = 0; i < records.length; i += BATCH_SIZE) {
+      const batch = records.slice(i, i + BATCH_SIZE);
+      await this.pineconeClient.upsert(batch);
+    }
 
     const linkData = JSON.parse(files[1]['buffer'].toString());
     // store the json file locally else override if already exist
@@ -62,19 +69,19 @@ export class DataIngestorService {
       './src/data_ingestor/linkspage.json',
       JSON.stringify(linkData),
     );
-    return 'test_data_2';
+    return 'DATA UPLOADED SUCCESSFULLY';
   }
 
   async query(query) {
-    const collection = await this.chromaClient.getCollection({
-      name: 'test_data_2',
-    });
     const embed = await createQueryEmbedding(query.query);
-    const results = await collection.query({
-      nResults: 3,
-      queryEmbeddings: embed,
+    const results = await this.pineconeClient.query({
+      topK: 3,
+      includeMetadata: true,
+      vector: embed[0],
+      includeValues: true,
     });
 
+    // TODO: UNCOMMENT THE BELOW PART IF THE RESULTS ARE CONSISTENT
     const data = JSON.parse(
       fs.readFileSync('./src/data_ingestor/data.json').toString(),
     );
@@ -83,13 +90,13 @@ export class DataIngestorService {
       fs.readFileSync('./src/data_ingestor/linkspage.json').toString(),
     );
 
-    const metadata = results['metadatas'][0];
+    const len = results['matches'].length;
     const pages_to_pass = [];
 
-    for (let i = 0; i < metadata.length; i++) {
-      const page_number = metadata[i]['page_num'];
+    const matches = results['matches'];
+    for (let i = 0; i < len; i++) {
+      const page_number = matches[i]['metadata']['page_num'];
       let page_content = '';
-      // @ts-ignore
       const page_data = data['pages'][page_number];
       for (const line in page_data['lines']) {
         const line_text = page_data['lines'][line]['text'];
@@ -108,7 +115,7 @@ export class DataIngestorService {
     for (const page in pages_to_pass) {
       const page_number = pages_to_pass[page]['page_number'];
       const page_content = pages_to_pass[page]['page_content'];
-      if (parseInt(page) == 2) continue;
+
       context +=
         'Source: \n' +
         // TODO -> RN ONLY SUPERFLUID WE CAN EXTEND IT AS WE INCREASE OUR DATASET
