@@ -28,7 +28,7 @@ export class DataIngestorService {
     const prompt = new PromptTemplate({
       inputVariables: ['query', 'context'],
       template:
-        'Given is the query and the context, output a result for the user query and provide the source link given to you in the context.: \nQuery: {query} \nContext: \n{context}',
+        'Given is the query and the context, output a result for the query and provide the source link given to you in the context: \nQuery: {query} \nContext: \n{context}',
     });
     this.chain = new LLMChain({
       llm: llm,
@@ -63,7 +63,6 @@ export class DataIngestorService {
     }
 
     const linkData = JSON.parse(files[1]['buffer'].toString());
-    // store the json file locally else override if already exist
     fs.writeFileSync('./src/data_ingestor/data.json', JSON.stringify(data));
     fs.writeFileSync(
       './src/data_ingestor/linkspage.json',
@@ -74,8 +73,9 @@ export class DataIngestorService {
 
   async query(query) {
     const embed = await createQueryEmbedding(query.query);
+    // TODO -> REMOVE THIS IN PROD
     const results = await this.pineconeClient.query({
-      topK: 3,
+      topK: 2,
       includeMetadata: true,
       vector: embed[0],
       includeValues: true,
