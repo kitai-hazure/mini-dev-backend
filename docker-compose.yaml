@@ -1,0 +1,21 @@
+services:
+  mini-dev-backend:
+    container_name: mini-dev-backend
+    image: mini-dev-backend
+    env_file: 
+      - .env
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 5000:5000
+    networks:
+      - mini_dev_backend_network
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: unless-stopped
+
+networks:
+  mini_dev_backend_network:
+    driver: bridge
