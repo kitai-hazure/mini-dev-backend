@@ -2,8 +2,6 @@ services:
   mini-dev-backend:
     container_name: mini-dev-backend
     image: mini-dev-backend
-    env_file: 
-      - .env
     build:
       dockerfile: Dockerfile
       context: .
