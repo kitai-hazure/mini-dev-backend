@@ -15,3 +15,8 @@ export const getUserFromToken = async (token: string) => {
   const user = await admin.auth().getUser(token);
   return user;
 };
+
+export const testingToken = async (token: string) => {
+  const user = await admin.auth().verifyIdToken(token);
+  return user;
+}
